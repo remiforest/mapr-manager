@@ -8,6 +8,8 @@ Library of functions to manage a cluster
 import requests
 import json
 
+__version__ = "0.0.1"
+
 # disables console warning when calling an insecured URL
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
@@ -15,12 +17,12 @@ class Cluster:
 
     def __init__(self,name,ip_address,username=None,password=None):
         self.name = name
-        self.mcs = ip_address
         self.cldbs = [ip_address]
         self.nodes = []
         self.username = username
         self.password = password
-        self.url = "https://{}:8443/rest".format(self.mcs)
+        self.port = 8443
+        self.url = "https://{}:{}/rest".format(ip_address,self.port)
 
 
     def authenticate(self,username,password):
@@ -36,6 +38,10 @@ class Cluster:
             print(response)
             print(response.content)
             return "request failed" # TD : raise exception
+
+    def initialize(self):
+        """ query cluster to populate all values """
+        self.nodes = self.get_nodes() 
 
 
     """ Cluster management """
@@ -76,4 +82,6 @@ class Cluster:
 
 if __name__ == '__main__':
     c = Cluster("demo.mapr.com","10.0.0.11","mapr","mapr")
+    print(c.get_nodes())
+    print(c.get_nodes(service="cldb"))
     c.create_stream("/test2")
