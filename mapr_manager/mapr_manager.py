@@ -1,14 +1,9 @@
 #! /usr/bin/python
 
-"""
-Library of functions to manage a cluster
-
-"""
 
 import requests
 import json
 
-__version__ = "0.0.1"
 
 # disables console warning when calling an insecured URL
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -77,7 +72,15 @@ class Cluster:
             print(response) #TD : raise exception
             return False
 
-    
+    def is_stream(self,path):
+        """ returns True if object is a stream, False if not """
+        url = "/stream/info?path={}".format(path)
+        response = self.post(url)
+        if response["status"] == "OK":
+            return True
+        else:
+            # print(response) #TD : raise exception
+            return False
 
 
 if __name__ == '__main__':
@@ -85,3 +88,5 @@ if __name__ == '__main__':
     print(c.get_nodes())
     print(c.get_nodes(service="cldb"))
     c.create_stream("/test2")
+    print(c.is_stream("/test2"))
+    print(c.is_stream("/test20"))
