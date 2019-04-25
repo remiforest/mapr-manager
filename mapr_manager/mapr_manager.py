@@ -59,12 +59,26 @@ class Cluster:
 
     """ Stream management """
 
-    def create_stream(self,path):
+    def create_stream(self,path,permissions={"produceperm":"p","consumeperm":"p","topicperm":"p","copyperm":"p","adminperm":"p"}):
         """
         creates a stream at the given path
         returns True if success
-        returns """
-        url = "/stream/create?path={}".format(path)
+        returns False if not
+        """
+        stream_permissions = ["produceperm","consumeperm","topicperm","copyperm","adminperm"]
+        for permission in stream_permissions:
+            try:
+                permissions[permission]
+            except:
+                permissions[permission]="p"
+
+        url = "/stream/create?path={}&produceperm={}&consumeperm={}&topicperm={}&copyperm={}&adminperm={}".format(path,
+                                      permissions["produceperm"],
+                                      permissions["consumeperm"],
+                                      permissions["topicperm"],
+                                      permissions["copyperm"],
+                                      permissions["adminperm"]
+                                      )
         response = self.post(url)
         if response["status"] == "OK":
             return True
@@ -73,7 +87,11 @@ class Cluster:
             return False
 
     def is_stream(self,path):
-        """ returns True if object is a stream, False if not """
+        """
+        check if path points on a stream
+        True if it's a stream
+        False if not
+        """
         url = "/stream/info?path={}".format(path)
         response = self.post(url)
         if response["status"] == "OK":
@@ -82,6 +100,19 @@ class Cluster:
             # print(response) #TD : raise exception
             return False
 
+    def delete_stream(self,path):
+        """
+        deletes a stream at the given path
+        returns True if success
+        returns False if failure
+        """
+        if self.is_stream(path):
+            url = "/stream/delete?path={}".format(path)
+            response = self.post(url)
+            if response["status"] == "OK":
+                return True
+        return False
+
 
 if __name__ == '__main__':
     c = Cluster("demo.mapr.com","10.0.0.11","mapr","mapr")
@@ -89,4 +120,5 @@ if __name__ == '__main__':
     print(c.get_nodes(service="cldb"))
     c.create_stream("/test2")
     print(c.is_stream("/test2"))
-    print(c.is_stream("/test20"))
+    c.delete_stream("/test2")
+    print(c.is_stream("/test2"))
