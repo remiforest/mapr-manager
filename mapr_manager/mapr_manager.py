@@ -113,9 +113,14 @@ class Cluster:
                 return True
         return False
 
-    def replicate_stream(self,path,replica):
+    def replicate_stream(self,path,replica,synchronous=False):
+        if synchronous:
+            synchronous = "true"
+        else:
+            synchronous = "false"
+
         if self.is_stream(path):
-            url = "/stream/replica/autosetup?path={}&replica={}".format(path,replica)
+            url = "/stream/replica/autosetup?path={}&replica={}&synchronous={}".format(path,replica,synchronous)
             response = self.post(url)
             if response["status"] == "OK":
                 return True
