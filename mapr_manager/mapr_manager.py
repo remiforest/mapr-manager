@@ -113,12 +113,27 @@ class Cluster:
                 return True
         return False
 
+    def replicate_stream(self,path,replica):
+        if self.is_stream(path):
+            url = "/stream/replica/autosetup?path={}&replica={}".format(path,replica)
+            response = self.post(url)
+            if response["status"] == "OK":
+                return True
+            print(response)
+        return False
 
 if __name__ == '__main__':
     c = Cluster("demo.mapr.com","10.0.0.11","mapr","mapr")
+    print("Get nodes")
     print(c.get_nodes())
+    print("Get CLDBs")
     print(c.get_nodes(service="cldb"))
-    c.create_stream("/test2")
-    print(c.is_stream("/test2"))
-    c.delete_stream("/test2")
-    print(c.is_stream("/test2"))
+    print("Create test stream : {}".format(c.create_stream("/test_stream")))
+    print("does test stream exists ? should be True : {}".format(c.is_stream("/test_stream")))
+    print("Create replica stream : {}".format(c.replicate_stream("/test_stream","/test_replica")))
+    print("does replica exists ? should be True : {}".format(c.is_stream("/test_replica")))
+    print("Delete test stream : {}".format(c.delete_stream("/test_stream")))
+    print("does test stream exists ? should be False : {}".format(c.is_stream("/test_stream")))
+    print("does replica exists ? should be True : {}".format(c.is_stream("/test_replica")))
+    print("Delete replica stream : {}".format(c.delete_stream("/test_replica")))
+    print("does replica exists ? should be False : {}".format(c.is_stream("/test_replica")))
